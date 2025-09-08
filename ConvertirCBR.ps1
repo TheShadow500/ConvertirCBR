@@ -156,7 +156,7 @@ function EliminarCaracteresEspeciales {
 	}
 	
 	# Renombra los caracteres especiales
-	$baseNuevo = ($base -replace '[\[\]\{\}%&;!^#~`"''<>:/\\\*\?]', '' -replace '\s{2,}', ' ').TrimEnd()
+	$baseNuevo = ($base -replace '[\[\]\{\}%&;!^~`"''<>:/\\\*\?]', '' -replace '\s{2,}', ' ').TrimEnd()
 	
 	# Reconstruye
 	$nombreNuevo = $baseNuevo + $extension
@@ -315,9 +315,9 @@ function ProcesarCBR {
 	
     # Comprimir la carpeta a .ZIP
     Write-Host "`nComprimiendo a .ZIP ..." -ForegroundColor Cyan
-    $carpetaZip = $carpetaWebP
-    $archivoZip = Join-Path $PWD "$carpetaActual.zip"
-    Compress-Archive -Path $carpetaZip -DestinationPath $archivoZip -Force
+	$carpetaZip = Split-Path $carpetaWebP -Leaf
+    $archivoZip = Join-Path $PWD "$carpetaZip.zip"
+    Compress-Archive -Path $carpetaWebP -DestinationPath $archivoZip -Force
     Write-Host ".ZIP creado" -ForegroundColor Green
 
     # Renombrar a .CBR
@@ -359,7 +359,7 @@ function VerificarTamaños {
 # ------------------------------------
 
 # Recorre cada carpeta y convierte las imagenes en .webp reduciendo su resolucion a 1800px y a 80% de calidad. Vuelve a comprimir y .ZIP, renombra a .CBR y mueve el archivo a la carpeta principal.
-Write-Host "ConvertirCBR v0.72 by Daniel Amores`n" -ForegroundColor Cyan
+Write-Host "ConvertirCBR v0.75 by Daniel Amores`n" -ForegroundColor Cyan
 
 # Solicita al usuario la ruta
 Write-Host "Introduzca la ruta absoluta: " -NoNewline -ForegroundColor Cyan
@@ -382,8 +382,8 @@ $rutasNoPermitidas = @(
     "c:\users"
 )
 
-if ($rutasNoPemitidas -contains $ruta) {
-	Write-Host "Ruta no permitida. Operacion cancelada.`n" - ForegroundColor Red
+if ($rutasNoPermitidas -contains $ruta) {
+	Write-Host "Ruta no permitida. Operacion cancelada.`n" -ForegroundColor Red
 	exit
 }
 
