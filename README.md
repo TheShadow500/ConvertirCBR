@@ -89,6 +89,8 @@ Este script requiere herramientas externas:
 - [7-Zip](https://www.7-zip.org/) → para descomprimir archivos `.CBR` y `.CBZ`.  
 - [FFmpeg](https://ffmpeg.org/download.html) → para convertir imágenes a formato `.WEBP`.
 
+⚠️ Nota: Asegúrate de tener instalados **7-Zip** y **FFmpeg**, y que sus ejecutables (`7z.exe`, `ffmpeg.exe`) estén disponibles en la misma carpeta del script o en el PATH del sistema.
+
 ---
 
 ## 📌 EJEMPLO VISUAL
