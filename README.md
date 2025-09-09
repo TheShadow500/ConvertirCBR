@@ -82,6 +82,15 @@ El script:
 
 ---
 
+## 🛠️ DEPENDENCIAS
+
+Este script requiere herramientas externas:
+
+- [7-Zip](https://www.7-zip.org/) → para descomprimir archivos `.CBR` y `.CBZ`.  
+- [FFmpeg](https://ffmpeg.org/download.html) → para convertir imágenes a formato `.WEBP`.
+
+---
+
 ## 📌 EJEMPLO VISUAL
 
 Imagina que tienes esta estructura:
