@@ -1,4 +1,4 @@
-# Funcion que renombra los archivos .CBR y .CBZ a .ZIP o .RAR
+﻿# Funcion que renombra los archivos .CBR y .CBZ a .ZIP o .RAR
 function RenombrarArchivosCBR {
 	param (
 		[System.IO.FileInfo]$archivo
@@ -10,7 +10,7 @@ function RenombrarArchivosCBR {
 	# Si no deteca la extension lo omite
 	if ($extension -ieq "Desconocido") {
 		Write-Host "OMITIDO:" -NoNewline -ForegroundColor Yellow -BackgroundColor Black
-		Write-Host " No se reconoce la extension del archivo."
+		Write-Host " No se reconoce la extensión del archivo."
 		return
 	}
 
@@ -156,7 +156,16 @@ function EliminarCaracteresEspeciales {
 	}
 	
 	# Renombra los caracteres especiales
-	$baseNuevo = ($base -replace '[\[\]\{\}%&;!^~`"''<>:/\\\*\?]', '' -replace '\s{2,}', ' ').TrimEnd()
+	$baseNuevo = $base `
+		-replace '[\[\]\{\}%&;!^~`"''<>:/\\\*\?]', '' `
+		-replace '\s{2,}', ' ' `
+		-replace 'Â', 'A' ` -replace 'â', 'a' `
+		-replace 'Ê', 'E' ` -replace 'ê', 'e' `
+		-replace 'Î', 'I' ` -replace 'î', 'i' `
+		-replace 'Ô', 'O' ` -replace 'ô', 'o' `
+		-replace 'Û', 'U' ` -replace 'û', 'u'
+		
+	$baseNuevo = $baseNuevo.TrimEnd()
 	
 	# Reconstruye
 	$nombreNuevo = $baseNuevo + $extension
@@ -226,7 +235,7 @@ function ExtraerContenido {
 	} else {
 		Write-Host "   " -NoNewline
 		Write-Host "ADVERTENCIA:" -NoNewline -ForegroundColor Yellow -BackgroundColor Black
-		Write-Host " Aun quedan elementos en la subcarpeta. NO se eliminara por seguridad.`n"
+		Write-Host " Aun quedan elementos en la subcarpeta. NO se eliminará por seguridad.`n"
 	}
 }
 
@@ -285,7 +294,7 @@ function ProcesarImagenes {
 		}
 		
 		# Convertir imagenes
-		Write-Host "Convirtiendo paginas a .webp con 2000px y 85% de calidad" -ForegroundColor Green
+		Write-Host "Convirtiendo páginas a .webp con 2000px y 85% de calidad" -ForegroundColor Green
 		foreach ($imagen in $imagenes){
 			$contador++
 			$input = $imagen.FullName
@@ -302,7 +311,7 @@ function ProcesarImagenes {
     } else {
 		$errorCarpeta.Value = 1
 		Write-Host "OMITIDO:" -NoNewline -ForegroundColor Yellow -BackgroundColor Black
-		Write-Host " No se han encontrado imagenes para procesar"
+		Write-Host " No se han encontrado imágenes para procesar"
 		Pop-Location
         return
 	}
@@ -359,14 +368,23 @@ function VerificarTamaños {
 # ------------------------------------
 
 # Recorre cada carpeta y convierte las imagenes en .webp reduciendo su resolucion a 1800px y a 80% de calidad. Vuelve a comprimir y .ZIP, renombra a .CBR y mueve el archivo a la carpeta principal.
-Write-Host "ConvertirCBR v0.75 by Daniel Amores`n" -ForegroundColor Cyan
+Write-Host "=====================================================" -ForegroundColor DarkCyan
+Write-Host " ConvertirCBR v0.81 by Daniel Amores" -ForegroundColor Yellow
+Write-Host "-----------------------------------------------------" -ForegroundColor DarkCyan
+Write-Host " Script en PowerShell para gestionar cómics:" -ForegroundColor Cyan
+Write-Host " - Renombra .CBR/.CBZ según su formato real" -ForegroundColor Green
+Write-Host " - Limpia archivos y carpetas innecesarias" -ForegroundColor Green
+Write-Host " - Convierte imágenes a .webp optimizado" -ForegroundColor Green
+Write-Host " - Recompone los archivos en .CBR ahorrando espacio" -ForegroundColor Green
+Write-Host "=====================================================" -ForegroundColor DarkCyan
+Write-Host ""
 
 # Solicita al usuario la ruta
 Write-Host "Introduzca la ruta absoluta: " -NoNewline -ForegroundColor Cyan
 $ruta = Read-Host
 
 if ([string]::IsNullOrWhiteSpace($ruta)) {
-    Write-Host "No se ha introducido ninguna ruta. Operacion cancelada.`n" -ForegroundColor Yellow
+    Write-Host "No se ha introducido ninguna ruta. Operación cancelada.`n" -ForegroundColor Yellow
     exit
 }
 
@@ -383,7 +401,7 @@ $rutasNoPermitidas = @(
 )
 
 if ($rutasNoPermitidas -contains $ruta) {
-	Write-Host "Ruta no permitida. Operacion cancelada.`n" -ForegroundColor Red
+	Write-Host "Ruta no permitida. Operación cancelada.`n" -ForegroundColor Red
 	exit
 }
 
@@ -393,6 +411,31 @@ if (-Not (Test-Path -LiteralPath $ruta)) {
 	Write-Host " La carpeta '$ruta' no existe`n"
 	return
 }
+
+# Resumen de operaciones
+Write-Host "`n=== RESUMEN DE OPERACIONES ===" -ForegroundColor Yellow
+Write-Host "Carpeta seleccionada: " -NoNewline
+Write-Host "$ruta" -ForegroundColor Green
+Write-Host "----------------------------------------" -ForegroundColor DarkGray
+Write-Host "Se realizarán las siguientes operaciones:"
+Write-Host "  - Normalización de los nombres de los archivos .CBR y .CBZ." -ForegroundColor Cyan
+Write-Host "  - Renombrado de las extensiones .CBR y .CBZ a .RAR y .ZIP, detectando su extensión original." -ForegroundColor Cyan
+Write-Host "  - Descompresión de los archivos .RAR y .ZIP en carpetas independientes." -ForegroundColor Cyan
+Write-Host "  - Normalización y limpieza del contenido de cada carpeta:" -ForegroundColor Cyan
+Write-Host "      - Eliminación de subcarpetas __MACOSX." -ForegroundColor DarkCyan
+Write-Host "      - Eliminación de archivos .txt y Thumbs.db." -ForegroundColor DarkCyan
+Write-Host "      - Eliminación de archivos .jpg con nombre _zz_ o _xx_ correspondientes a publicidad." -ForegroundColor DarkCyan
+Write-Host "      - Eliminación de caracteres especiales como [], {}, %, etc." -ForegroundColor DarkCyan
+Write-Host "      - Movimiento del contenido de subcarpetas internas a la carpeta principal." -ForegroundColor DarkCyan
+Write-Host "      - Eliminación de subcarpetas vacías." -ForegroundColor DarkCyan
+Write-Host "  - Conversión de imágenes .jpg a formato WebP (más óptimo), con resolución de 2000px y calidad al 85% respecto a la original." -ForegroundColor Cyan
+Write-Host "  - Creación del nuevo archivo .CBR." -ForegroundColor Cyan
+Write-Host "  - Cálculo de la diferencia de tamaño entre el archivo original y el nuevo." -ForegroundColor Cyan
+Write-Host "  - Eliminación de la carpeta con el contenido descomprimido." -ForegroundColor Cyan
+Write-Host "  - Informe al usuario del total de espacio ahorrado." -ForegroundColor Cyan
+
+Write-Host "`nPara comenzar la operación, pulse cualquier tecla..."
+[void][System.Console]::ReadKey($true)
 
 # Carpeta base donde se ejecuta el script
 $basePath = Get-Location
@@ -459,7 +502,7 @@ if ($archivos.Count -gt 0) {
 $archivos = Get-ChildItem -LiteralPath $ruta -File -Filter *.rar
 
 # Descomprimir cada archivo .RAR a su propia carpeta
-Write-Host "`nArchivos.RAR" -ForegroundColor Cyan
+Write-Host "`nArchivos .RAR" -ForegroundColor Cyan
 if ($archivos.Count -gt 0){
 	$totalArchivos = 1
 	foreach ($archivo in $archivos) {
@@ -478,7 +521,7 @@ if ($archivos.Count -gt 0){
 Write-Host "`nSANEAR Y NORMALIZAR CONTENIDOS" -ForegroundColor Yellow
 
 # Eliminacion de __MACOSX
-Write-Host "Eliminacion de carpetas __MACOSX" -ForegroundColor Cyan
+Write-Host "Eliminación de carpetas __MACOSX" -ForegroundColor Cyan
 
 # Obtiene todos los archivos
 $archivos = Get-ChildItem -Recurse -Directory -Force | Where-Object { $_.Name -ieq '__MACOSX' }
@@ -499,7 +542,7 @@ if ($archivos.Count -gt 0) {
 
 # -------------------------------------------------------
 # Eliminacion de archivos .TXT
-Write-Host "`nEliminacion de archivos .TXT y Thumbs.db" -ForegroundColor Cyan
+Write-Host "`nEliminación de archivos .TXT y Thumbs.db" -ForegroundColor Cyan
 
 # Obtiene todos los archivos
 $archivos = Get-ChildItem -Recurse -File -Force | Where-Object { $_.Extension -match '\.txt' -or $_.Name -match '^thumbs\.db$' }
@@ -520,7 +563,7 @@ if ($archivos.Count -gt 0) {
 
 # -------------------------------------------------------
 # Eliminacion de archivos .JPG con nombres _zz_
-Write-Host "`nEliminacion de archivos .JPG con nombres _zz_ y _xx_ (Publicidad)" -ForegroundColor Cyan
+Write-Host "`nEliminación de archivos .JPG con nombres _zz_ y _xx_ (Publicidad)" -ForegroundColor Cyan
 
 # Obtiene todos los archivos
 $archivos = Get-ChildItem -Recurse -File -Force | Where-Object { $_.Extension -match '\.jpg' -and ($_.BaseName -like 'zz*' -or $_.BaseName -like 'xx*') }
@@ -541,7 +584,7 @@ if ($archivos.Count -gt 0) {
 
 # -------------------------------------------------------
 # Eliminacion de caracteres especiales [ ] { } % etc
-Write-Host "`nEliminacion de caracteres especiales [] {} % etc" -ForegroundColor Cyan
+Write-Host "`nEliminación de caracteres especiales [] {} % etc" -ForegroundColor Cyan
 
 # Obtiene todos los archivos
 $archivos = Get-ChildItem -Recurse -Force
@@ -588,7 +631,7 @@ if ($carpetas.Count -gt 0) {
 
 # -------------------------------------------------------
 # Procesar imagenes a resolucion 1800 de altura con ancho automatico y calidad al 80%, convirtiendolas en webp
-Write-Host "`nPROCESANDO IMAGENES" -ForegroundColor Yellow
+Write-Host "`nPROCESANDO IMÁGENES" -ForegroundColor Yellow
 
 # Procesar cada subcarpeta
 if ($carpetas.Count -gt 0) {
