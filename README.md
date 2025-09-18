@@ -9,8 +9,9 @@
 El script:
 
 1. Solicita una ruta de **carpeta raíz** al usuario.
-2. Busca **subcarpetas directas** dentro de esa ruta.
-3. Procesa cada subcarpeta y la carpeta raíz:
+2.	Solicita la **calidad de las imágenes** al usuario.
+3. Busca **subcarpetas directas** dentro de esa ruta.
+4. Procesa cada subcarpeta y la carpeta raíz:
    - Detecta la extensión real de los archivos (`.ZIP` o `.RAR`) según los **Magic Digits**.
    - Renombra los archivos `.CBR`/`.CBZ` a su **extensión correcta**.
    - Descomprime los archivos en **carpetas separadas**.
@@ -20,7 +21,7 @@ El script:
    - Convierte todas las imágenes a **formato .WEBP** (altura 2000px, calidad 85).
    - Vuelve a empaquetar las imágenes convertidas en un archivo **.CBR**.
    - Compara el tamaño del archivo original con el convertido y muestra el **ahorro en MB**.
-4. Muestra un resumen final del **ahorro total en espacio**.
+5. Muestra un resumen final del **ahorro total en espacio**.
 
 ---
 
