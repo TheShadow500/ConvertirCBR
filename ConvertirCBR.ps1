@@ -244,7 +244,8 @@ function ProcesarImagenes {
     param (
         [System.IO.DirectoryInfo]$carpeta,
 		[string]$ffmpeg,
-		[ref]$errorCarpeta
+		[ref]$errorCarpeta,
+		$calidad
     )
 
 	Write-Host "Procesando: " -NoNewline
@@ -294,13 +295,13 @@ function ProcesarImagenes {
 		}
 		
 		# Convertir imagenes
-		Write-Host "Convirtiendo páginas a .webp con 2000px y 85% de calidad" -ForegroundColor Green
+		Write-Host "Convirtiendo páginas a .webp con 2000px y $calidad% de calidad" -ForegroundColor Green
 		foreach ($imagen in $imagenes){
 			$contador++
 			$input = $imagen.FullName
 			$output = Join-Path $carpetaWebP "$($imagen.BaseName).webp"
 			
-			& $ffmpeg -i "$input" -vf "scale=-1:2000" -q:v 85 "$output" *> $null
+			& $ffmpeg -i "$input" -vf "scale=-1:2000" -c:v libwebp -quality $calidad "$output" *> $null
 
 			Write-Host "($contador de $total) " -NoNewline -ForegroundColor Cyan
 			Write-Host "Realizado: " -NoNewline
@@ -369,7 +370,7 @@ function VerificarTamaños {
 
 # Recorre cada carpeta y convierte las imagenes en .webp reduciendo su resolucion a 1800px y a 80% de calidad. Vuelve a comprimir y .ZIP, renombra a .CBR y mueve el archivo a la carpeta principal.
 Write-Host "=====================================================" -ForegroundColor DarkCyan
-Write-Host " ConvertirCBR v0.81 by Daniel Amores" -ForegroundColor Yellow
+Write-Host " ConvertirCBR v0.86 by Daniel Amores" -ForegroundColor Yellow
 Write-Host "-----------------------------------------------------" -ForegroundColor DarkCyan
 Write-Host " Script en PowerShell para gestionar cómics:" -ForegroundColor Cyan
 Write-Host " - Renombra .CBR/.CBZ según su formato real" -ForegroundColor Green
@@ -412,6 +413,20 @@ if (-Not (Test-Path -LiteralPath $ruta)) {
 	return
 }
 
+# Solicita al usuario el porcentaje de calidad
+Write-Host "Introduzca la calidad de imagen (1-100) (por defecto: 85): " -NoNewline -ForegroundColor Cyan
+$calidad = Read-Host
+
+if ([string]::IsNullOrWhiteSpace($calidad)) {
+	$calidad = 85
+}
+
+if (-not [int]::TryParse($calidad, [ref]([int]0))) {
+	Write-Host "ERROR:" -NoNewline -ForegroundColor DarkRed -BackgroundColor Black
+	Write-Host " Debe introducir un número válido.`n"
+	exit
+}
+
 # Resumen de operaciones
 Write-Host "`n=== RESUMEN DE OPERACIONES ===" -ForegroundColor Yellow
 Write-Host "Carpeta seleccionada: " -NoNewline
@@ -428,7 +443,7 @@ Write-Host "      - Eliminación de archivos .jpg con nombre _zz_ o _xx_ corresp
 Write-Host "      - Eliminación de caracteres especiales como [], {}, %, etc." -ForegroundColor DarkCyan
 Write-Host "      - Movimiento del contenido de subcarpetas internas a la carpeta principal." -ForegroundColor DarkCyan
 Write-Host "      - Eliminación de subcarpetas vacías." -ForegroundColor DarkCyan
-Write-Host "  - Conversión de imágenes .jpg a formato WebP (más óptimo), con resolución de 2000px y calidad al 85% respecto a la original." -ForegroundColor Cyan
+Write-Host "  - Conversión de imágenes .jpg a formato WebP (más óptimo), con resolución de 2000px y calidad al $($calidad)% respecto a la original." -ForegroundColor Cyan
 Write-Host "  - Creación del nuevo archivo .CBR." -ForegroundColor Cyan
 Write-Host "  - Cálculo de la diferencia de tamaño entre el archivo original y el nuevo." -ForegroundColor Cyan
 Write-Host "  - Eliminación de la carpeta con el contenido descomprimido." -ForegroundColor Cyan
@@ -642,7 +657,7 @@ if ($carpetas.Count -gt 0) {
 		$errorCarpeta = 0
 		Write-Host "$($totalCarpetas)/$($carpetas.Count) " -NoNewline -ForegroundColor Cyan
 		$ffmpeg = Join-Path $basePath "ffmpeg.exe"
-		ProcesarImagenes -carpeta $carpeta -ffmpeg $ffmpeg -errorCarpeta ([ref]$errorCarpeta)
+		ProcesarImagenes -carpeta $carpeta -ffmpeg $ffmpeg -errorCarpeta ([ref]$errorCarpeta) -calidad $calidad
 		
 		# Elimina la carpeta descomprimida
 		if ((Test-Path -LiteralPath $carpeta.FullName) -and ($errorCarpeta -eq 0)){
